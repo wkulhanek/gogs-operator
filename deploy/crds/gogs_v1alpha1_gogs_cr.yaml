@@ -1,0 +1,7 @@
+apiVersion: gogs.opentlc.com/v1alpha1
+kind: Gogs
+metadata:
+  name: example-gogs
+spec:
+  # Add fields here
+  size: 3
