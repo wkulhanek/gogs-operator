@@ -3,18 +3,18 @@
   tasks:
   # - import_role:
   #     name: "Gogs"
-  - name: Set fallback facts
-    set_fact:
-      meta:
-        namespace: gogs-operator
-        name: wkgogs
-      postgresql_port: 5432
-      postgresql_volume_size: 4Gi
-      gogs_volume_size: 4Gi
+  # - name: Set fallback facts
+  #   set_fact:
+  #     meta:
+  #       namespace: gogs-operator
+  #       name: wkgogs
+  #     postgresql_port: 5432
+  #     postgresql_volume_size: 4Gi
+  #     gogs_volume_size: 4Gi
   - name: Set Facts
     set_fact:
       namespace: "{{ meta.namespace }}"
-      postgresql_database_name: "{{ meta.name }}"
+      postgresql_database_name: gogs
       postgresql_hostname: "postgresql-{{ meta.name }}"
       postgresql_user: gogs
       postgresql_password: gogs
