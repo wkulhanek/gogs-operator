@@ -1,9 +1,19 @@
+---
+# Persistent Gogs deployment playbook.
+#
+# The Playbook expects the following variables to be set in the CR:
+# (Note that Camel case gets converted by the ansible-operator to Snake case)
+# - PostgresqlPort
+# - PostgresqlVolumeSize
+# - GogsVolumeSize
+# The following variables come from the ansible-operator
+# - meta.namespace
+# - meta.name (from the name of the CR)
+
 - hosts: localhost
   gather_facts: no
   tasks:
-  # - import_role:
-  #     name: "Gogs"
-  # - name: Set fallback facts
+  # - name: Set fallback facts for running the playbook outside of an operator
   #   set_fact:
   #     meta:
   #       namespace: gogs-operator
