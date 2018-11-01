@@ -1,5 +1,356 @@
 - hosts: localhost
   gather_facts: no
   tasks:
-  - import_role:
-      name: "Gogs"
+  # - import_role:
+  #     name: "Gogs"
+  # - name: Set fallback facts
+  #   set_fact:
+  #     meta:
+  #       namespace: gogs-operator
+  #       name: wkgogs
+  #     postgresql_port: 5432
+  #     postgresql_volume_size: 4Gi
+  #     gogs_volume_size: 4Gi
+  - name: Set Facts
+    set_fact:
+      namespace: "{{ meta.namespace }}"
+      postgresql_database_name: "{{ meta.name }}"
+      postgresql_hostname: "postgresql-{{ meta.name }}"
+      postgresql_user: gogs
+      postgresql_password: gogs
+      gogs_name: "{{ meta.name }}"
+      state: present
+
+  - name: Set Postgresql Secret to {{ state }}
+    k8s:
+      state: "{{ state }}"
+      definition:
+        apiVersion: v1
+        kind: Secret
+        metadata:
+          name: "{{ postgresql_hostname }}"
+          namespace: "{{ namespace }}"
+        stringData:
+          database-name: "{{ postgresql_database_name }}"
+          database-user: "{{ postgresql_user }}"
+          database-password: "{{ postgresql_password }}"
+
+  - name: Set Postgresql Service to {{ state }}
+    k8s:
+      state: "{{ state }}"
+      definition:
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: "{{ postgresql_hostname }}"
+          namespace: "{{ namespace }}"
+        spec:
+          ports:
+          - name: "{{ postgresql_hostname }}"
+            port: "{{ postgresql_port }}"
+            protocol: TCP
+            targetPort: "{{ postgresql_port }}"
+          selector:
+            name: "{{ postgresql_hostname }}"
+          sessionAffinity: None
+          type: ClusterIP
+
+  - name: Set Postgresql PersistentVolumeClaim to {{ state }}
+    k8s:
+      state: "{{ state }}"
+      definition:
+        apiVersion: v1
+        kind: PersistentVolumeClaim
+        metadata:
+          name: "{{ postgresql_hostname }}-pvc"
+          namespace: "{{ namespace }}"
+        spec:
+          accessModes:
+          - ReadWriteOnce
+          resources:
+            requests:
+              storage: "{{ postgresql_volume_size }}"
+
+  - name: Set Postgresql DeploymentConfig to {{ state }}
+    k8s:
+      state: "{{ state }}"
+      definition:
+        apiVersion: v1
+        kind: DeploymentConfig
+        metadata:
+          name: "{{ postgresql_hostname }}"
+          namespace: "{{ namespace }}"
+        spec:
+          replicas: 1
+          selector:
+            name: "{{ postgresql_hostname }}"
+          strategy:
+            type: Recreate
+          template:
+            metadata:
+              labels:
+                name: "{{ postgresql_hostname }}"
+            spec:
+              containers:
+              - env:
+                - name: POSTGRESQL_USER
+                  valueFrom:
+                    secretKeyRef:
+                      key: database-user
+                      name: "{{ postgresql_hostname }}"
+                - name: POSTGRESQL_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      key: database-password
+                      name: "{{ postgresql_hostname }}"
+                - name: POSTGRESQL_DATABASE
+                  valueFrom:
+                    secretKeyRef:
+                      key: database-name
+                      name: "{{ postgresql_hostname }}"
+                image: 'registry.redhat.io/rhscl/postgresql-96-rhel7:latest'
+                imagePullPolicy: IfNotPresent
+                livenessProbe:
+                  exec:
+                    command:
+                    - /usr/libexec/check-container
+                    - --live
+                  initialDelaySeconds: 120
+                  timeoutSeconds: 10
+                name: postgresql
+                ports:
+                - containerPort: "{{ postgresql_port }}"
+                  protocol: TCP
+                readinessProbe:
+                  exec:
+                    command:
+                    - /usr/libexec/check-container
+                  initialDelaySeconds: 5
+                  timeoutSeconds: 1
+                resources:
+                  limits:
+                    memory: 512Mi
+                securityContext:
+                  capabilities: {}
+                  privileged: false
+                terminationMessagePath: /dev/termination-log
+                volumeMounts:
+                - mountPath: /var/lib/pgsql/data
+                  name: "{{ postgresql_hostname }}-data"
+              dnsPolicy: ClusterFirst
+              restartPolicy: Always
+              volumes:
+              - name: "{{ postgresql_hostname }}-data"
+                persistentVolumeClaim:
+                  claimName: "{{ postgresql_hostname }}-pvc"
+
+  - name: Verify that the Postgresql pod is running
+    when: state == "present"
+    k8s:
+      api_version: apps.openshift.io/v1
+      kind: DeploymentConfig
+      name: "{{ postgresql_hostname }}"
+      namespace: "{{ namespace }}"
+    register: postgresql_deployment
+    until:
+    - postgresql_deployment.result.status.availableReplicas is defined
+    - postgresql_deployment.result.status.availableReplicas > 0
+    retries: 20
+    delay: 5
+    changed_when: false
+
+  - name: Set Gogs Service to {{ state }}
+    k8s:
+      state: "{{ state }}"
+      definition:
+        kind: Service
+        apiVersion: v1
+        metadata:
+          name: "{{ gogs_name }}"
+          namespace: "{{ namespace }}"
+          labels:
+            app: "{{ gogs_name }}"
+        spec:
+          selector:
+            app: "{{ gogs_name }}"
+          ports:
+          - protocol: TCP
+            targetPort: 3000
+            name: "{{ gogs_name }}-tcp"
+            port: 3000
+          sessionAffinity: None
+          type: ClusterIP
+
+  - name: Set Gogs Route to {{ state }}
+    k8s:
+      state: "{{ state }}"
+      definition:
+        kind: Route
+        apiVersion: v1
+        metadata:
+          name: "{{ gogs_name }}"
+          namespace: "{{ namespace }}"
+          labels:
+            app: "{{ gogs_name }}"
+        spec:
+          to:
+            name: "{{ gogs_name }}"
+    register: gogs_route_result
+
+  - name: Debug result
+    debug:
+      msg: "{{ gogs_route_result }}"
+
+  - name: Store Gogs Route Hostname for deletion (workaround)
+    set_fact:
+      gogs_route: "{{ gogs_route_result.result.spec.host }}"
+    when: gogs_route_result.method == "create" or gogs_route_result.method == "patch"
+
+  - name: Store Gogs Route Hostname for deletion (workaround)
+    set_fact:
+      gogs_route: "dummy"
+    when: gogs_route_result.method == 'delete'
+
+  - name: Print Gogs Route
+    debug:
+      msg: "Gogs Route is: {{ gogs_route }}"
+
+  - name: Set Gogs PersistentVolumeClaim to {{ state }}
+    k8s:
+      state: "{{ state }}"
+      definition:
+        kind: PersistentVolumeClaim
+        apiVersion: v1
+        metadata:
+          name: "{{ gogs_name }}-pvc"
+          namespace: "{{ namespace }}"
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: "{{ gogs_volume_size }}"
+
+  - name: Set Gogs ConfigMap to {{ state }}
+    k8s:
+      state: "{{ state }}"
+      definition:
+        kind: ConfigMap
+        apiVersion: v1
+        metadata:
+          name: "{{ gogs_name }}-config"
+          namespace: "{{ namespace }}"
+        data:
+          app.ini: |
+            APP_NAME = Gogs
+            RUN_MODE = prod
+            RUN_USER = gogs
+
+            [database]
+            DB_TYPE  = postgres
+            HOST     = "{{ postgresql_hostname }}:{{ postgresql_port }}"
+            NAME     = "{{ postgresql_database_name }}"
+            USER     = "{{ postgresql_user }}"
+            PASSWD   = "{{ postgresql_password }}"
+            SSL_MODE = disable
+
+            [repository]
+            ROOT = /data/repositories
+
+            [server]
+            ROOT_URL="http://{{ gogs_route }}"
+
+            [security]
+            INSTALL_LOCK = true
+
+            [mailer]
+            ENABLED = false
+
+            [service]
+            ENABLE_CAPTCHA = false
+            REGISTER_EMAIL_CONFIRM = false
+            ENABLE_NOTIFY_MAIL     = false
+            DISABLE_REGISTRATION   = false
+            REQUIRE_SIGNIN_VIEW    = false
+
+            [picture]
+            DISABLE_GRAVATAR        = false
+            ENABLE_FEDERATED_AVATAR = true
+
+            [webhook]
+            SKIP_TLS_VERIFY = true
+
+  - name: Set Gogs DeploymentConfig to {{ state }}
+    k8s:
+      state: "{{ state }}"
+      definition:
+        kind: DeploymentConfig
+        apiVersion: v1
+        metadata:
+          name: "{{ gogs_name }}"
+          namespace: "{{ namespace }}"
+          labels:
+            app: "{{ gogs_name }}"
+        spec:
+          replicas: 1
+          selector:
+            app: "{{ gogs_name }}"
+          strategy:
+            rollingParams:
+              intervalSeconds: 1
+              maxSurge: 25%
+              maxUnavailable: 25%
+              timeoutSeconds: 600
+              updatePeriodSeconds: 1
+            type: Rolling
+          template:
+            metadata:
+              labels:
+                app: "{{ gogs_name }}"
+            spec:
+              containers:
+              - image: "docker.io/wkulhanek/gogs:latest"
+                imagePullPolicy: IfNotPresent
+                name: "{{ gogs_name }}"
+                ports:
+                - containerPort: 3000
+                  protocol: TCP
+                resources: {}
+                volumeMounts:
+                - name: gogs-data
+                  mountPath: /data
+                - name: gogs-config
+                  mountPath: /opt/gogs/custom/conf
+                readinessProbe:
+                    httpGet:
+                      path: /
+                      port: 3000
+                      scheme: HTTP
+                    initialDelaySeconds: 3
+                    timeoutSeconds: 1
+                    periodSeconds: 20
+                    successThreshold: 1
+                    failureThreshold: 3
+                livenessProbe:
+                    httpGet:
+                      path: /
+                      port: 3000
+                      scheme: HTTP
+                    initialDelaySeconds: 3
+                    timeoutSeconds: 1
+                    periodSeconds: 10
+                    successThreshold: 1
+                    failureThreshold: 3
+              dnsPolicy: ClusterFirst
+              restartPolicy: Always
+              terminationGracePeriodSeconds: 30
+              volumes:
+              - name: gogs-data
+                persistentVolumeClaim:
+                  claimName: "{{ gogs_name }}-pvc"
+              - name: gogs-config
+                configMap:
+                  name: "{{ gogs_name }}-config"
+                  items:
+                    - key: app.ini
+                      path: app.ini

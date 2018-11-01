@@ -3,5 +3,6 @@ kind: Gogs
 metadata:
   name: example-gogs
 spec:
-  # Add fields here
-  size: 3
+  postgresqlVolumeSize: 4Gi
+  postgresqlPort: 5432
+  gogsVolumeSize: 4Gi
