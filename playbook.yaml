@@ -75,7 +75,7 @@
     k8s:
       state: "{{ state }}"
       definition:
-        apiVersion: v1
+        apiVersion: apps.openshift.io/v1
         kind: DeploymentConfig
         metadata:
           name: "{{ postgresql_hostname }}"
@@ -285,7 +285,7 @@
       state: "{{ state }}"
       definition:
         kind: DeploymentConfig
-        apiVersion: v1
+        apiVersion: apps.openshift.io/v1
         metadata:
           name: "{{ gogs_name }}"
           namespace: "{{ namespace }}"
