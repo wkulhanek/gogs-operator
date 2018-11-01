@@ -3,14 +3,14 @@
   tasks:
   # - import_role:
   #     name: "Gogs"
-  # - name: Set fallback facts
-  #   set_fact:
-  #     meta:
-  #       namespace: gogs-operator
-  #       name: wkgogs
-  #     postgresql_port: 5432
-  #     postgresql_volume_size: 4Gi
-  #     gogs_volume_size: 4Gi
+  - name: Set fallback facts
+    set_fact:
+      meta:
+        namespace: gogs-operator
+        name: wkgogs
+      postgresql_port: 5432
+      postgresql_volume_size: 4Gi
+      gogs_volume_size: 4Gi
   - name: Set Facts
     set_fact:
       namespace: "{{ meta.namespace }}"
@@ -19,6 +19,7 @@
       postgresql_user: gogs
       postgresql_password: gogs
       gogs_name: "{{ meta.name }}"
+      gogs_route: "dummy"
       state: present
 
   - name: Set Postgresql Secret to {{ state }}
@@ -51,7 +52,7 @@
             protocol: TCP
             targetPort: "{{ postgresql_port }}"
           selector:
-            name: "{{ postgresql_hostname }}"
+            app: "{{ postgresql_hostname }}"
           sessionAffinity: None
           type: ClusterIP
 
@@ -71,25 +72,26 @@
             requests:
               storage: "{{ postgresql_volume_size }}"
 
-  - name: Set Postgresql DeploymentConfig to {{ state }}
+  - name: Set Postgresql Deployment to {{ state }}
     k8s:
       state: "{{ state }}"
       definition:
-        apiVersion: apps.openshift.io/v1
-        kind: DeploymentConfig
+        apiVersion: apps/v1
+        kind: Deployment
         metadata:
           name: "{{ postgresql_hostname }}"
           namespace: "{{ namespace }}"
         spec:
           replicas: 1
           selector:
-            name: "{{ postgresql_hostname }}"
+            matchLabels:
+              app: "{{ postgresql_hostname }}"
           strategy:
             type: Recreate
           template:
             metadata:
               labels:
-                name: "{{ postgresql_hostname }}"
+                app: "{{ postgresql_hostname }}"
             spec:
               containers:
               - env:
@@ -147,8 +149,8 @@
   - name: Verify that the Postgresql pod is running
     when: state == "present"
     k8s:
-      api_version: apps.openshift.io/v1
-      kind: DeploymentConfig
+      api_version: apps/v1
+      kind: Deployment
       name: "{{ postgresql_hostname }}"
       namespace: "{{ namespace }}"
     register: postgresql_deployment
@@ -197,23 +199,10 @@
             name: "{{ gogs_name }}"
     register: gogs_route_result
 
-  - name: Debug result
-    debug:
-      msg: "{{ gogs_route_result }}"
-
-  - name: Store Gogs Route Hostname for deletion (workaround)
+  - name: Store Gogs Route Hostname
     set_fact:
       gogs_route: "{{ gogs_route_result.result.spec.host }}"
     when: gogs_route_result.method == "create" or gogs_route_result.method == "patch"
-
-  - name: Store Gogs Route Hostname for deletion (workaround)
-    set_fact:
-      gogs_route: "dummy"
-    when: gogs_route_result.method == 'delete'
-
-  - name: Print Gogs Route
-    debug:
-      msg: "Gogs Route is: {{ gogs_route }}"
 
   - name: Set Gogs PersistentVolumeClaim to {{ state }}
     k8s:
@@ -280,21 +269,20 @@
             [webhook]
             SKIP_TLS_VERIFY = true
 
-  - name: Set Gogs DeploymentConfig to {{ state }}
+  - name: Set Gogs Deployment to {{ state }}
     k8s:
       state: "{{ state }}"
       definition:
-        kind: DeploymentConfig
-        apiVersion: apps.openshift.io/v1
+        apiVersion: apps/v1
+        kind: Deployment
         metadata:
           name: "{{ gogs_name }}"
           namespace: "{{ namespace }}"
-          labels:
-            app: "{{ gogs_name }}"
         spec:
           replicas: 1
           selector:
-            app: "{{ gogs_name }}"
+            matchLabels:
+              app: "{{ gogs_name }}"
           strategy:
             rollingParams:
               intervalSeconds: 1
@@ -302,7 +290,7 @@
               maxUnavailable: 25%
               timeoutSeconds: 600
               updatePeriodSeconds: 1
-            type: Rolling
+            type: RollingUpdate
           template:
             metadata:
               labels:
