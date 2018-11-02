@@ -119,3 +119,25 @@ oc get route
 ----
 
 . Use the hostname returned in your Web Browser to open the Gogs UI.
+
+== Deleting a Gogs Server
+
+Deleting a gogs server and its associated resources is as simple as deleting the gogs object. If you created a gogs server called `gogs-server` as in the example above it suffices to run the delete command on that resource:
+
+[source,sh]
+----
+oc delete gogs gogs-server
+----
+
+The Operator adds ownerReference fields to all created objects - which means that deleting the Gogs object also deletes all objects that have been created by the Operator.
+
+== Uninstalling the Gogs Operator
+
+In case you wish to uninstall the Gogs Operator make sure that there are no more projects using the gogs-operator. Then as *cluster-admin* delete the ClusterRoleBinding, ClusterRole and Custom Resource:
+
+[source,sh]
+----
+oc delete ClusterRoleBinding gogs-operator-deployer
+oc delete ClusterRole gogs-operator-deployer
+oc delete CRD gogs.gogs.opentlc.com
+----
