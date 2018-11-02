@@ -1,7 +1,7 @@
 apiVersion: gogs.opentlc.com/v1alpha1
 kind: Gogs
 metadata:
-  name: example-gogs
+  name: gogs-server
 spec:
   postgresqlVolumeSize: 4Gi
   postgresqlPort: 5432
