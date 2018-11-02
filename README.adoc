@@ -82,8 +82,7 @@ The Gogs Operator understands the following settings under it's *spec* setting:
 * postgresqlPort: The port for PostgreSQL to run under (e.g. 5432). Adjust if you want to run multiple instances of the Gogs CR in a single project
 * gogsVolumeSize: The size of the Persistent Volume to be created for the Gogs database (e.g. 4Gi)
 
-Example:
-+
+.Example
 [source,texinfo]
 ----
 apiVersion: gogs.opentlc.com/v1alpha1
