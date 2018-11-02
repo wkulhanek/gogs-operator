@@ -104,6 +104,13 @@ oc create -f ./gogs-server.yaml
 
 . The operator will first create the PostgreSQL database, wait until it is up and running and then create the Gogs Server.
 . Validate that both pods (postgresql and gogs) are running before proceeding.
+. You can validate the existence of your Gogs Server by querying for gogs objects:
++
+[source,sh]
+----
+oc get gogs
+----
+
 . Get the Route for the Gogs Server (the PostgreSQL database is not accessible outside of the project):
 +
 [source,sh]
