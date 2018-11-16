@@ -27,7 +27,7 @@
       spec:
         ports:
         - name: "{{ _postgresql_name }}"
-          port: "{{ _postgresql_port }}"
+          port: 5432
           protocol: TCP
           targetPort: 5432
         selector:
