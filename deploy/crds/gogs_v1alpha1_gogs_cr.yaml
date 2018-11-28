@@ -4,6 +4,5 @@ metadata:
   name: gogs-server
 spec:
   postgresqlVolumeSize: 4Gi
-  postgresqlPort: 5432
   gogsVolumeSize: 4Gi
   gogsSsl: True

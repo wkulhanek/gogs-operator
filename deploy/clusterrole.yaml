@@ -1,11 +1,20 @@
-apiVersion: rbac.authorization.k8s.io/v1
+---
+apiVersion: authorization.openshift.io/v1
 kind: ClusterRole
 metadata:
-  name: gogs-operator-deployer
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-admin: "true"
+  name: gogs-admin-rules
 rules:
 - apiGroups:
-  - "gogs.opentlc.com"
+  - gpte.opentlc.com
   resources:
-  - '*'
+  - gogs
   verbs:
-  - '*'
+  - create
+  - update
+  - delete
+  - get
+  - list
+  - watch
+  - patch
