@@ -1,6 +1,7 @@
 #!/bin/bash
 # Update latest Roles
-rm -rf roles/*
+rm -rf roles
+mkdir roles
 git clone https://github.com/redhat-gpte-devopsautomation/ansible-operator-roles
 cp -R ansible-operator-roles/roles/postgresql-ocp ./roles
 cp -R ansible-operator-roles/roles/gogs-ocp ./roles
