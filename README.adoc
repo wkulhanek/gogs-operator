@@ -138,10 +138,17 @@ The Operator adds ownerReference fields to all created objects - which means tha
 
 == Uninstalling the Gogs Operator
 
-In case you wish to uninstall the Gogs Operator make sure that there are no more projects using the gogs-operator. Then as *cluster-admin* delete the ClusterRole and Custom Resource:
+In case you wish to uninstall the Gogs Operator make sure that there are no more Gogs instances running. Once all Gogs instances have been deleted simply delete the project the operator is running in.
 
 [source,sh]
 ----
-oc delete ClusterRole gogs-admin-rules
-oc delete CRD gogs.gogs.opentlc.com
+oc delete project gogs
+----
+
+Then as *cluster-admin* delete the ClusterRole and Custom Resource:
+
+[source,sh]
+----
+oc delete clusterrole gogs-admin-rules
+oc delete crd gogs.gogs.opentlc.com
 ----
