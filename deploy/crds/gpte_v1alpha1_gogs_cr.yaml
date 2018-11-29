@@ -1,4 +1,4 @@
-apiVersion: gogs.opentlc.com/v1alpha1
+apiVersion: gpte.opentlc.com/v1alpha1
 kind: Gogs
 metadata:
   name: gogs-server

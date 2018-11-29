@@ -30,7 +30,7 @@ rules:
   #- "get"
   #- "create"
 - apiGroups:
-  - gogs.opentlc.com
+  - gpte.opentlc.com
   resources:
   - gogs
   verbs:

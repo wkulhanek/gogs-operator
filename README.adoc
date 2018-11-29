@@ -26,7 +26,7 @@ Perform the following tasks as *cluster-admin*:
 +
 [source,sh]
 ----
-oc create -f https://raw.githubusercontent.com/wkulhanek/gogs-operator/master/deploy/crds/gogs_v1alpha1_gogs_crd.yaml
+oc create -f https://raw.githubusercontent.com/wkulhanek/gogs-operator/master/deploy/crds/gpte_v1alpha1_gogs_crd.yaml
 ----
 
 . Deploy the `gogs-admin-rules` Cluster Role (which will be granted automatically to everyone with `admin` privileges):
@@ -79,7 +79,7 @@ oc create -f https://raw.githubusercontent.com/wkulhanek/gogs-operator/master/de
 
 == Deploying a Gogs Server using the Operator
 
-The Gogs Server is deployed by creating a Custom Resource based on the gogs Custom Resource Definition. There is an example of a Gogs CR at https://raw.githubusercontent.com/wkulhanek/gogs-operator/master/deploy/crds/gogs_v1alpha1_gogs_cr.yaml.
+The Gogs Server is deployed by creating a Custom Resource based on the gogs Custom Resource Definition. There is an example of a Gogs CR at https://raw.githubusercontent.com/wkulhanek/gogs-operator/master/deploy/crds/gpte_v1alpha1_gogs_cr.yaml.
 
 The Gogs Operator understands the following settings under it's *spec* setting:
 
@@ -90,7 +90,7 @@ The Gogs Operator understands the following settings under it's *spec* setting:
 .Example
 [source,texinfo]
 ----
-apiVersion: gogs.opentlc.com/v1alpha1
+apiVersion: gpte.opentlc.com/v1alpha1
 kind: Gogs
 metadata:
   name: gogs-server

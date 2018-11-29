@@ -1,5 +1,5 @@
 ---
 - version: v1alpha1
-  group: gogs.opentlc.com
+  group: gpte.opentlc.com
   kind: Gogs
   playbook: /opt/ansible/playbook.yaml
