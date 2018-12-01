@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gogs-cluster-operator
+  name: gogs-operator
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: gogs-cluster-operator
+      name: gogs-operator
   template:
     metadata:
       labels:
-        name: gogs-cluster-operator
+        name: gogs-operator
     spec:
-      serviceAccountName: gogs-cluster-operator
+      serviceAccountName: gogs-operator
       containers:
-        - name: gogs-cluster-operator
-          image: quay.io/wkulhanek/gogs-cluster-operator:v0.0.1
+        - name: gogs-operator
+          image: quay.io/wkulhanek/gogs-operator:v0.0.1
           ports:
           - containerPort: 60000
             name: metrics
@@ -24,4 +24,4 @@ spec:
             - name: WATCH_NAMESPACE
               value: ""
             - name: OPERATOR_NAME
-              value: "gogs-cluster-operator"
+              value: "gogs-operator"
