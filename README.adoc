@@ -8,7 +8,7 @@ The Operator will create a *PostgreSQL* database with persistent storage and a *
 
 It is implemented on top of the Red Hat https://github.com/operator-framework/operator-sdk[Operator SDK] - in particular the https://github.com/operator-framework/operator-sdk/blob/master/doc/ansible/user-guide.md[Ansible Operator].
 
-== Building the Operator
+== Building the Operator Image
 
 There is a script `build.sh` which will download the prerequisite Ansible roles from https://github.com/redhat-gpte-devopsautomation/ansible-operator-roles and install the required roles. The script will then build the container image.
 
@@ -16,9 +16,9 @@ Before running the script make sure to update the location of the container imag
 
 == Installation
 
-The installation of the Custom Resource Definition and Cluster Role requires *cluster-admin* privileges. After that regular users with `admin` privileges on their projects (which is automatically granted to the user who creates a project) can provision the Gogs Operator in their projects and deploy instances of Gogs using the gogs.gogs.opentlc.com Custom Resource.
+== Common Installation Steps
 
-=== Cluster-Admin Tasks
+The installation of the Custom Resource Definition and Cluster Role requires *cluster-admin* privileges. After that regular users with `admin` privileges on their projects (which is automatically granted to the user who creates a project) can provision the Gogs Operator in their projects and deploy instances of Gogs using the gogs.gogs.opentlc.com Custom Resource.
 
 Perform the following tasks as *cluster-admin*:
 
@@ -29,12 +29,33 @@ Perform the following tasks as *cluster-admin*:
 oc create -f https://raw.githubusercontent.com/wkulhanek/gogs-operator/master/deploy/crds/gpte_v1alpha1_gogs_crd.yaml
 ----
 
-. Deploy the `gogs-admin-rules` Cluster Role (which will be granted automatically to everyone with `admin` privileges):
+. Deploy the `gogs-admin-rules` Cluster Role (which will be granted automatically to everyone with `admin` privileges). This role allows every project admin to create Gogs custom resources:
++
+[source,sh]
+----
+oc create -f https://raw.githubusercontent.com/wkulhanek/gogs-operator/master/deploy/clusterrole_admin.yaml
+----
+
+== Clusterwide Installation
+
+Perform the following tasks as *cluster-admin*:
+
+. Create the Cluster Role for the Operator
 +
 [source,sh]
 ----
 oc create -f https://raw.githubusercontent.com/wkulhanek/gogs-operator/master/deploy/clusterrole.yaml
 ----
+
+. Create a project for the operator to run in (different from where the application will be running)
++
+[source,sh]
+----
+oc new-project gpte-operators --display-name="GPTE Operators"
+----
+
+
+== Local Installation in a Project
 
 === Regular User Tasks
 
