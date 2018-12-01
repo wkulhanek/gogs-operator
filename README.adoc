@@ -16,9 +16,9 @@ Before running the script make sure to update the location of the container imag
 
 == Installation
 
-== Common Installation Steps
+=== Common Installation Steps
 
-The installation of the Custom Resource Definition and Cluster Role requires *cluster-admin* privileges. After that regular users with `admin` privileges on their projects (which is automatically granted to the user who creates a project) can provision the Gogs Operator in their projects and deploy instances of Gogs using the gogs.gogs.opentlc.com Custom Resource.
+The installation of the Custom Resource Definition and Cluster Role requires *cluster-admin* privileges. After that regular users with `admin` privileges on their projects (which is automatically granted to the user who creates a project) can provision the Gogs Operator in their projects and deploy instances of Gogs using the gogs.gpte.opentlc.com Custom Resource.
 
 Perform the following tasks as *cluster-admin*:
 
@@ -36,7 +36,7 @@ oc create -f https://raw.githubusercontent.com/wkulhanek/gogs-operator/master/de
 oc create -f https://raw.githubusercontent.com/wkulhanek/gogs-operator/master/deploy/clusterrole_admin.yaml
 ----
 
-== Clusterwide Installation
+=== Clusterwide Installation
 
 Perform the following tasks as *cluster-admin*:
 
@@ -77,9 +77,7 @@ oc create -f https://raw.githubusercontent.com/wkulhanek/gogs-operator/master/de
 
 . Once the Operator pod is running the Operator is ready to start creating Gogs Servers.
 
-== Local Installation in a Project
-
-=== Regular User Tasks
+=== Local Installation in a Project
 
 The next steps work either as *cluster-admin* or as a *regular user*.
 
