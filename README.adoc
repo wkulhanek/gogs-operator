@@ -106,7 +106,7 @@ oc create -f https://raw.githubusercontent.com/wkulhanek/gogs-operator/master/de
 +
 [source,sh]
 ----
-oc create -f https://raw.githubusercontent.com/wkulhanek/gogs-operator/master/deploy/role_binding.yaml
+oc create -f https://raw.githubusercontent.com/wkulhanek/gogs-operator/master/deploy/rolebinding.yaml
 ----
 
 . And finally create the Gogs *Operator*:
