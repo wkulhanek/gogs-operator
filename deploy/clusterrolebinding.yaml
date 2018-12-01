@@ -4,7 +4,7 @@ metadata:
   name: gogs-cluster-operator
 subjects:
 - kind: ServiceAccount
-  name: gogs-cluster-operator
+  name: gogs-operator
   namespace: gpte-operators
 roleRef:
   kind: ClusterRole
