@@ -140,6 +140,7 @@ spec:
   postgresqlVolumeSize: 4Gi
   gogsVolumeSize: 4Gi
   gogsSsl: True
+  gogsServiceName: mygogs
 ----
 
 . Write the definition to a file (e.g. gogs-server.yaml) and then create the Gogs instance:
