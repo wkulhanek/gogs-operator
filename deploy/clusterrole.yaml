@@ -33,6 +33,7 @@ rules:
   - gpte.opentlc.com
   resources:
   - gogs
+  - gogs/status
   verbs:
   - create
   - update
