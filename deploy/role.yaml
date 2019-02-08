@@ -1,5 +1,5 @@
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
+kind: ClusterRole
 metadata:
   name: gogs-operator
 rules:
@@ -10,8 +10,20 @@ rules:
   - services
   - endpoints
   - persistentvolumeclaims
+  - events
   - configmaps
   - secrets
+  verbs:
+  - create
+  - update
+  - delete
+  - get
+  - list
+  - watch
+  - patch
+- apiGroups:
+  - route.openshift.io
+  resources:
   - routes
   verbs:
   - create
@@ -21,14 +33,19 @@ rules:
   - list
   - watch
   - patch
-  # Enable this if operator-metering is installed in your cluster.
-  #- apiGroups:
-  #- monitoring.coreos.com
-  #resources:
-  #- servicemonitors
-  #verbs:
-  #- "get"
-  #- "create"
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get
+- apiGroups:
+  - monitoring.coreos.com
+  resources:
+  - servicemonitors
+  verbs:
+  - get
+  - create
 - apiGroups:
   - gpte.opentlc.com
   resources:

@@ -1,0 +1,44 @@
+---
+# Persistent Gogs deployment playbook.
+#
+# The Playbook expects the following variables to be set in the CR:
+# (Note that Camel case gets converted by the ansible-operator to Snake case)
+# - PostgresqlVolumeSize
+# - GogsVolumeSize
+# - GogsSSL
+# The following variables come from the ansible-operator
+# - meta.namespace
+# - meta.name (from the name of the CR)
+
+- hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: Set up PostgreSQL
+    include_role:
+      name: ./roles/postgresql-ocp
+    vars:
+      _postgresql_namespace: "{{ meta.namespace }}"
+      _postgresql_name: "postgresql-gogs-{{ meta.name }}"
+      _postgresql_database_name: "gogsdb"
+      _postgresql_user: "gogsuser"
+      _postgresql_password: "gogspassword"
+      _postgresql_volume_size: "{{ postgresql_volume_size|d('4Gi') }}"
+
+  - name: Set Gogs Service name to default value
+    set_fact:
+      gogs_service_name: "gogs-{{ meta.name }}"
+    when:
+      gogs_service_name is not defined
+  - name: Set up Gogs
+    include_role:
+      name: ./roles/gogs-ocp
+    vars:
+      _gogs_namespace: "{{ meta.namespace }}"
+      _gogs_name: "{{ gogs_service_name }}"
+      _gogs_ssl: "{{ gogs_ssl|d(False)|bool }}"
+      _gogs_volume_size: "{{ gogs_volume_size|d('4Gi') }}"
+      _gogs_image_tag: "{{ gogs_image_tag|d('latest') }}"
+      _gogs_postgresql_service_name: "postgresql-gogs-{{ meta.name }}"
+      _gogs_postgresql_database_name: gogsdb
+      _gogs_postgresql_user: gogsuser
+      _gogs_postgresql_password: gogspassword
