@@ -15,11 +15,11 @@ spec:
       serviceAccountName: gogs-operator
       containers:
         - name: gogs-operator
-          image: quay.io/wkulhanek/gogs-operator:v0.0.5
+          image: quay.io/wkulhanek/gogs-operator:v0.0.6
           ports:
           - containerPort: 60000
             name: metrics
-          imagePullPolicy: "{{ pull_policy|default('Always') }}"
+          imagePullPolicy: IfNotPresent
           env:
             - name: WATCH_NAMESPACE
               valueFrom:
