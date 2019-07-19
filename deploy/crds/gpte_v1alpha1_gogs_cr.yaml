@@ -1,7 +1,8 @@
 apiVersion: gpte.opentlc.com/v1alpha1
 kind: Gogs
 metadata:
-  name: example-gogs
+  name: gogs-server
 spec:
-  # Add fields here
-  size: 3
+  postgresqlVolumeSize: 4Gi
+  gogsVolumeSize: 4Gi
+  gogsSsl: True
