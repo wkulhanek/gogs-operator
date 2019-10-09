@@ -6,7 +6,7 @@ subjects:
 - kind: ServiceAccount
   name: gogs-operator
   # Replace this with the namespace the operator is deployed in.
-  namespace: REPLACE_NAMESPACE
+  namespace: REPLACE_ME
 roleRef:
   kind: ClusterRole
   name: gogs-operator

@@ -8,11 +8,13 @@ rules:
   resources:
   - pods
   - services
+  - services/finalizers
   - endpoints
   - persistentvolumeclaims
   - events
   - configmaps
   - secrets
+  - serviceaccounts
   verbs:
   - create
   - update
@@ -22,9 +24,9 @@ rules:
   - watch
   - patch
 - apiGroups:
-  - route.openshift.io
+  - apps
   resources:
-  - routes
+  - deployments
   verbs:
   - create
   - update
@@ -33,12 +35,6 @@ rules:
   - list
   - watch
   - patch
-- apiGroups:
-  - ""
-  resources:
-  - namespaces
-  verbs:
-  - get
 - apiGroups:
   - monitoring.coreos.com
   resources:
@@ -46,6 +42,45 @@ rules:
   verbs:
   - get
   - create
+- apiGroups:
+  - apps
+  resourceNames:
+  - gogs-operator
+  resources:
+  - deployments/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+- apiGroups:
+  - apps
+  resources:
+  - replicasets
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get
+- apiGroups:
+  - route.openshift.io
+  resources:
+  - routes
+  - routes/custom-host
+  verbs:
+  - create
+  - update
+  - delete
+  - get
+  - list
+  - watch
+  - patch
 - apiGroups:
   - gpte.opentlc.com
   resources:
@@ -59,11 +94,3 @@ rules:
   - list
   - watch
   - patch
-- apiGroups:
-  - apps
-  resourceNames:
-  - gogs-operator
-  resources:
-  - deployments/finalizers
-  verbs:
-  - update
