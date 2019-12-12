@@ -19,14 +19,14 @@ spec:
           - /usr/local/bin/ao-logs
           - /tmp/ansible-operator/runner
           - stdout
-          image: quay.io/gpte-devops-automation/gogs-operator:v0.10
+          image: quay.io/gpte-devops-automation/gogs-operator:v0.12
           imagePullPolicy: Always
           volumeMounts:
           - mountPath: /tmp/ansible-operator/runner
             name: runner
             readOnly: true
         - name: operator
-          image: quay.io/gpte-devops-automation/gogs-operator:v0.10
+          image: quay.io/gpte-devops-automation/gogs-operator:v0.12
           imagePullPolicy: Always
           volumeMounts:
           - mountPath: /tmp/ansible-operator/runner
@@ -40,6 +40,8 @@ spec:
                   fieldPath: metadata.name
             - name: OPERATOR_NAME
               value: "gogs-operator"
+            - name: ANSIBLE_GATHERING
+              value: explicit
       volumes:
         - name: runner
           emptyDir: {}
