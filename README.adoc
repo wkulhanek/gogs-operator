@@ -44,7 +44,7 @@ Perform the following tasks as *cluster-admin*:
 +
 [source,sh]
 ----
-oc create -f https://raw.githubusercontent.com/wkulhanek/gogs-operator/master/deploy/clusterrole.yaml
+oc create -f https://raw.githubusercontent.com/wkulhanek/gogs-operator/master/deploy/cluster_role.yaml
 ----
 
 . Create a project for the operator to run in (different from where the application will be running)
@@ -65,14 +65,14 @@ oc create -f https://raw.githubusercontent.com/wkulhanek/gogs-operator/master/de
 +
 [source,sh]
 ----
-oc adm policy add-cluster-role-to-user gogs-cluster-operator system:serviceaccount:gpte-operators:gogs-operator
+oc adm policy add-cluster-role-to-user gogs-operator system:serviceaccount:gpte-operators:gogs-operator
 ----
 
 . And finally create the Gogs *Operator*:
 +
 [source,sh]
 ----
-oc create -f https://raw.githubusercontent.com/wkulhanek/gogs-operator/master/deploy/cluster_operator.yaml
+oc create -f https://raw.githubusercontent.com/wkulhanek/gogs-operator/master/deploy/operator.yaml
 ----
 
 . Once the Operator pod is running the Operator is ready to start creating Gogs Servers.
