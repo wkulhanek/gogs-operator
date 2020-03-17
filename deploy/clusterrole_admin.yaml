@@ -1,4 +1,3 @@
-echo '---
 apiVersion: authorization.openshift.io/v1
 kind: ClusterRole
 metadata:
@@ -42,4 +41,4 @@ rules:
   - list
   - patch
   - update
-  - watch' | oc apply -f -
+  - watch
