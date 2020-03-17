@@ -65,7 +65,7 @@ oc create -f https://raw.githubusercontent.com/wkulhanek/gogs-operator/master/de
 +
 [source,sh]
 ----
-oc adm policy add-cluster-role-to-user gogs-cluster-operator system:serviceaccount:gpte-operators:gogs-operator
+oc adm policy add-cluster-role-to-user gogs-operator system:serviceaccount:gpte-operators:gogs-operator
 ----
 
 . And finally create the Gogs *Operator*:
